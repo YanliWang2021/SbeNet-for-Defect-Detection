@@ -16,15 +16,15 @@ import numpy as np
 
 def test(opt):
     
-    dataSetRoot = f"Data/{opt.Dataset}/F{opt.Fold}"
+    dataSetRoot = os.path.join("Data",opt.Dataset,f"F{opt.Fold}")
     
-    OutputPath = f"Model/{opt.Dataset}_F{opt.Fold}_lambda{opt.Lambda}_{opt.Remark}"
+    OutputPath = os.path.join("Model",f"{opt.Dataset}_F{opt.Fold}_lambda{opt.Lambda}_{opt.Remark}")
     
-    now_time = dt.datetime.now().strftime('%b.%d %T')
+    now_time = dt.datetime.now().strftime('%b_%d_%H_%M_%S')
 
     saveResultPath = os.path.join(OutputPath,"Testresult",now_time)
     
-    logPath = os.path.join(OutputPath,f'Log/Test/{now_time}')
+    logPath = os.path.join(OutputPath,'Log','Test',now_time)
     
 
     os.environ['CUDA_VISIBLE_DEVICES']=opt.gpu_ids

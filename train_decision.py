@@ -17,17 +17,17 @@ def train_Decision(opt):
     try:
         Error = False
         
-        now_time = dt.datetime.now().strftime('%b.%d %T')
+        now_time = dt.datetime.now().strftime('%b_%d_%H_%M_%S')
 
-        dataSetRoot = f"Data/{opt.Dataset}/F{opt.Fold}"
+        dataSetRoot = os.path.join("Data",opt.Dataset,f"F{opt.Fold}")
 
-        OutputPath = f"Model/{opt.Dataset}_F{opt.Fold}_lambda{opt.Lambda}_{opt.Remark}"
+        OutputPath = os.path.join("Model",f"{opt.Dataset}_F{opt.Fold}_lambda{opt.Lambda}_{opt.Remark}")
         
         model_name = f'Dec_lr{opt.Lr}_Batch{opt.Batch_size}_Epoch{opt.End_epoch}'
 
         saveModelDir = os.path.join(OutputPath,"Decision_Model",model_name)        
         verifyDir = os.path.join(OutputPath,"Decision_Varify",model_name)
-        logPath = os.path.join(OutputPath,f'Log/{model_name}/{now_time}')
+        logPath = os.path.join(OutputPath,'Log',model_name,now_time)
 
         gpu_num = len(opt.gpu_ids.split(','))
 
@@ -63,16 +63,16 @@ def train_Decision(opt):
             decision_net = decision_net.cuda()
             criterion_decision.cuda()
 
-        if gpu_num > 1:
-            segment_net = torch.nn.DataParallel(segment_net, device_ids=list(range(opt.gpu_num)))
-            decision_net = torch.nn.DataParallel(decision_net, device_ids=list(range(opt.gpu_num)))
-
         if opt.Need_load_decision_model:
             decision_net.load_state_dict(torch.load(opt.Load_decision_model_dir))
 
 
         segment_net.load_state_dict(torch.load(opt.Load_segment_model_dir))
         segment_net.eval()
+
+        if gpu_num > 1:
+            segment_net = torch.nn.DataParallel(segment_net, device_ids=list(range(gpu_num)))
+            decision_net = torch.nn.DataParallel(decision_net, device_ids=list(range(gpu_num)))
 
         # Optimizers
         optimizer_dec = torch.optim.Adam(decision_net.parameters(), lr=opt.Lr, betas=(opt.b1, opt.b2))
@@ -151,7 +151,7 @@ def train_Decision(opt):
             print("[Epoch {%d}/{%d}] [Epoch loss {%.10f}]"%(epoch,opt.End_epoch, epoch_loss))
 
             # save parameters *****************************************************************
-            if opt.Train_with_save and epoch % opt.Save_interval == 0 and epoch >= opt.Save_interval:
+            if opt.Train_with_save and epoch % opt.Save_interval == 0:
                 decision_net.eval()
 
                 if gpu_num>1:
@@ -163,7 +163,7 @@ def train_Decision(opt):
                 decision_net.train()
 
             # test ****************************************************************************
-            if opt.Train_with_test and epoch % opt.Test_interval == 0 and epoch >= opt.Test_interval:
+            if opt.Train_with_test and epoch % opt.Test_interval == 0 :
             #if True:
                 decision_net.eval()
                 test_epoch_loss = 0
@@ -200,12 +200,14 @@ def train_Decision(opt):
 
                     torch.cuda.synchronize()
 
+                    
+                    pred_socre.append(predictionTest.cpu().item())
+                    label_score.append(labelTest.cpu().item())
 
-                    if not label :
+                    if not labelTest.cpu().item():
                         save_path_str = os.path.join(verifyDir,f"epoch{epoch}","fromOK")
                     else:
                         save_path_str = os.path.join(verifyDir,f"epoch{epoch}","fromNG")
-
 
                     if os.path.exists(save_path_str) == False:
                         os.makedirs(save_path_str, exist_ok=True)
@@ -232,11 +234,7 @@ def train_Decision(opt):
 
                 decision_net.train()
 
-    except Exception as e:
+    except FileExistsError as e:
         Error = True
         content = f"Decision Network Error have some problem: {e}"
-        print(content)
-    
-    if not Error:
-        content = f'''F{opt.Fold}_Dice{opt.Dice}_Bec{float(1-opt.Dice)}_Dilate{opt.Dilate}_Dec_seg{opt.dec_trainseg_epoch}_lr{opt.dec_lr}_Batch{opt.dec_batch_size}_Epoch{opt.dec_end_epoch}_{opt.remark} Trained!!!'''
         print(content)

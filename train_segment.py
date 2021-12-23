@@ -34,17 +34,17 @@ def train_Segment(opt):
     try:
         Error = False       
         print(opt)
-        now_time = dt.datetime.now().strftime('%b.%d %T')
+        now_time = dt.datetime.now().strftime('%b_%d_%H_%M_%S')
 
-        dataSetRoot = f"Data/{opt.Dataset}/F{opt.Fold}"
+        dataSetRoot = os.path.join("Data",opt.Dataset,"F"+{opt.Fold})
 
-        OutputPath = f"Model/{opt.Dataset}_F{opt.Fold}_lambda{opt.Lambda}_{opt.Remark}"
+        OutputPath = os.path.join("Model",f"{opt.Dataset}_F{opt.Fold}_lambda{opt.Lambda}_{opt.Remark}")
 
         model_name = f'Seg_lr{opt.Lr}_Batch{opt.Batch_size}_Epoch{opt.End_epoch}'
         
         saveModelDir = os.path.join(OutputPath,"Segment_Model",model_name)
         verifyDir = os.path.join(OutputPath,"Segment_Varify",model_name)
-        logpath = os.path.join(OutputPath,f'Log/{model_name}/{now_time}')
+        logpath = os.path.join(OutputPath,f'Log/{model_name},{now_time}')
 
 
 
@@ -199,7 +199,7 @@ def train_Segment(opt):
 
                     if os.path.exists(save_path_str) == False:
                         os.makedirs(save_path_str, exist_ok=True)
-       
+
                     save_image(imgTest.data, "%s/img_%d.jpg"% (save_path_str, i))
                     save_image(segTest.data, "%s/img_%d_seg.jpg"% (save_path_str, i))
 
