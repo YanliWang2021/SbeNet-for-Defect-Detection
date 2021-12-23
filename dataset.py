@@ -3,11 +3,9 @@ import os
 import numpy as np
 import cv2
 import torch
-
 from torch.utils.data import Dataset 
 from PIL import Image
 import torchvision.transforms as transforms
-
 import torchvision.transforms.functional as VF
 
 def Divide(dataroot,datatype,selection):
@@ -108,10 +106,3 @@ class Dataset(Dataset):
     def __len__(self):
         return len(self.imgFiles)
         
-
-
-
-
-if __name__ == "__main__":
-    t = Divide("Data/SSD/Test",'SSD','NG')
-    pass

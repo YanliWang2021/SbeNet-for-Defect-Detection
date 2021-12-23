@@ -1,14 +1,12 @@
 
 from models import SegmentNet,DecisionNet
 from dataset import Dataset
-
 import torch.nn as nn
 import torch
 from torchvision.utils import save_image
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
-
 import os
 import PIL.Image as Image
 import datetime as dt
@@ -64,7 +62,7 @@ def test(opt):
 
     testloader = DataLoader(
         Dataset(dataSetRoot, opt.Dataset, transforms_sample=transforms_sample, transforms_mask= transforms_mask,  subFold="Test", isTrain=False, label="ALL"),
-        batch_size=4,
+        batch_size=1,
         shuffle=False,
         num_workers=0,
     )

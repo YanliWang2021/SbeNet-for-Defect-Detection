@@ -30,7 +30,7 @@ def main(opt):
                     raise(FileNotFoundError("Can not find the segment model"))
                 train_Decision(opt)
             
-    except FileExistsError as e:
+    except Exception as e:
         print(e)
     
 if __name__ == "__main__":

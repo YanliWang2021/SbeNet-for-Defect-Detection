@@ -1,52 +1,21 @@
 from models import SegmentNet
-# from models import SegmentNet, DecisionNet, weights_init_kaiming, weights_init_normal
 from dataset import Dataset
-import cv2
-import torch.nn as nn
 import torch
-
-from torchvision import datasets
 from torchvision.utils import save_image
 import torchvision.transforms as transforms
-from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from tensorboardX import SummaryWriter
-
 import os
-import sys
-import argparse
-import time
 import PIL.Image as Image
-
-from ptflops import get_model_complexity_info
-
-import random
 import numpy as np
-
-#from measures import compute_ave_MAE_of_methods
-
-from shutil import copyfile
 import datetime as dt
-from Temp.tools.SendEmail import SendEmail
-from auxfunc import setup_seed
 
-'''
-random.seed(0)
-torch.manual_seed(0)
-torch.cuda.manual_seed_all(0)
-np.random.seed(0)
-torch.backends.cudnn.deterministic = True
-'''
+
 def dice_loss(pred, mask):
-    
-    # zeros = torch.zeros_like(pred)
-    # ones = torch.ones_like(pred)
     pred = torch.sigmoid(pred)
-    # pred = torch.where(pred>0.51,ones,zeros)
     inter = ((pred * mask)).sum(dim=(2, 3))
     union = ((pred + mask)).sum(dim=(2, 3))
-    #wiou = 1 - ((inter + 1)/(union - inter+1)).mean()
     wiou = 1 - ((inter + 1)/(union+1)).mean()
 
     return wiou
@@ -59,22 +28,6 @@ def computeIOU(pred,mask):
     union = ((pred + mask)).sum(dim=(0,1,2,3))
     wiou = ((inter + 1)/(union - inter+1)).mean()
     return wiou
-
-def showloss(pred, mask,opt):
-    zeros = torch.zeros_like(pred)
-    ones = torch.ones_like(pred)
-    pred = torch.sigmoid(pred)
-    pred = torch.where(pred>0.5,ones,zeros)
-
-    inter = ((pred * mask)).sum(dim=(2, 3))
-    union = ((pred + mask)).sum(dim=(2, 3))
-    dice = 1 - ((inter + 1)/(union+1)).mean()
-
-    bce = torch.nn.BCELoss()(pred,mask)
-
-    loss = opt.Lambda*dice + (1-opt.Lambda)*bce
-
-    return {'dice':dice.item(),'bce':bce.item(),'loss':loss.item()}
 
 
 def train_Segment(opt):
@@ -166,11 +119,9 @@ def train_Segment(opt):
             loss_epoch = 0
             iterOK = trainOKloader.__iter__()
             iterNG = trainNGloader.__iter__()
-
             lenNum = len(trainOKloader)*2
 
             segment_net.train()
-
             # train *****************************************************************
             for i in range(0, lenNum):
                 try:
@@ -224,14 +175,10 @@ def train_Segment(opt):
         
             # test ****************************************************************************
             if opt.Train_with_test and epoch % opt.Test_interval == 0 and epoch >= opt.Test_interval:
-            #if opt.need_test:
                 test_loss = 0
                 segment_net.eval()
-                now_time = dt.datetime.now().strftime('%b.%d %T')
-                print(now_time+' Begin Test!')
                 
                 iou_list = []
-                pos_iou_list = []
                 for i, testBatch in enumerate(testloader):
                     if opt.cuda:
                         imgTest = testBatch["img"].cuda()
@@ -281,7 +228,7 @@ def train_Segment(opt):
 
                 segment_net.train()
 
-    except FileExistsError as e:
+    except Exception as e:
         Error = True
         emailcontent = f"Segment Network Error have some problem: {e}"
         emailsubject = "Segment Network Error"

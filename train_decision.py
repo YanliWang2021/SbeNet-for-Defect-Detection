@@ -8,17 +8,10 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from tensorboardX import SummaryWriter
-
-
 import os
-import sys
-import argparse
-import time
 import PIL.Image as Image
-from shutil import copyfile
 import datetime as dt
-from Temp.tools.SendEmail import SendEmail
-from auxfunc import compute_roc,compute_ap,setup_seed
+from auxfunc import compute_roc,compute_ap
 
 def train_Decision(opt):
     try:
@@ -239,7 +232,7 @@ def train_Decision(opt):
 
                 decision_net.train()
 
-    except FileExistsError as e:
+    except Exception as e:
         Error = True
         content = f"Decision Network Error have some problem: {e}"
         print(content)
