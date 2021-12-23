@@ -59,15 +59,17 @@ def Divide(dataroot,datatype,selection):
 class Dataset(Dataset):
     def __init__(self, dataRoot, datatype, transforms_sample= None, transforms_mask = None, subFold=None, isTrain=True,label = None):
 
+        if transforms_sample== None:
+            self.sampletransform = transforms.Compose([transforms.ToTensor()])
+        else:
+            self.sampletransform = transforms_sample
+
         if transforms_mask == None:
-            self.maskTransform = transforms.Compose([transforms.ToTensor()])
+            self.maskTransform = transforms_sample
         else:
             self.maskTransform = transforms_mask
         
-        if transforms_sample== None:
-            self.sampletransform = self.maskTransform
-        else:
-            self.sampletransform = transforms_sample
+        
 
         if subFold == None:
             file_dir = dataRoot
@@ -83,35 +85,23 @@ class Dataset(Dataset):
 
     def __getitem__(self, index):
         idx = index % self.len
+        img = Image.open(self.imgFiles[idx]).convert("L")
+        mat = cv2.imread(self.labelFiles[idx], cv2.IMREAD_GRAYSCALE)
+        kernel = np.ones((3, 3), np.uint8)
+        mat = cv2.dilate(mat, kernel)
+        mask = Image.fromarray(mat)
+        label = np.array([float(bool(np.sum(np.sum(mat))))]).astype('float32')
         if self.isTrain==True:
-            img = Image.open(self.imgFiles[idx]).convert("L")
-            mat = cv2.imread(self.labelFiles[idx], cv2.IMREAD_GRAYSCALE)
-            kernel = np.ones((5, 5), np.uint8)
-            mat = cv2.dilate(mat, kernel)
-            mask = Image.fromarray(mat)
             if np.random.rand(1) > 0.5:
                 mask = VF.hflip(mask)
                 img  = VF.hflip(img)
             if np.random.rand(1) > 0.5:
                 mask = VF.vflip(mask)
                 img  = VF.vflip(img)
-            label = np.array([float(bool(np.sum(np.sum(mat))))]).astype('float32')
-            
-            img = self.sampletransform(img)
-            mask = self.maskTransform(mask)
-            label = torch.from_numpy(label)
-        else:
-            img = Image.open(self.imgFiles[idx]).convert("L")
-
-            mat = cv2.imread(self.labelFiles[idx], cv2.IMREAD_GRAYSCALE)
-            kernel = np.ones((5, 5), np.uint8)
-            mat = cv2.dilate(mat, kernel)
-            mask = Image.fromarray(mat)
-            label = np.array([float(bool(np.sum(np.sum(mat))))]).astype('float32')
-            
-            img = self.sampletransform(img)
-            mask = self.maskTransform(mask)
-            label = torch.from_numpy(label)
+    
+        img = self.sampletransform(img)
+        mask = self.maskTransform(mask)
+        label = torch.from_numpy(label)
 
         return {"img":img,"mask":mask, "label":label}
 

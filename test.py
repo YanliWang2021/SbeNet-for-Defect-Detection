@@ -17,10 +17,6 @@ import numpy as np
 
 
 def test(opt):
-
-    segModelDir = opt.Load_segment_model_dir
-    
-    decModelDir = opt.Load_decision_model_dir
     
     dataSetRoot = f"Data/{opt.Dataset}/F{opt.Fold}"
     
@@ -47,9 +43,9 @@ def test(opt):
         decision_net = decision_net.cuda()
 
     if opt.Need_load_segment_model:
-        segment_net.load_state_dict(torch.load(segModelDir))
+        segment_net.load_state_dict(torch.load(opt.Load_segment_model_dir))
     if opt.Need_load_decision_model:
-        decision_net.load_state_dict(torch.load(decModelDir))
+        decision_net.load_state_dict(torch.load(opt.Load_decision_model_dir))
 
     if gpu_num >1 :
         decision_net = nn.DataParallel(decision_net,device_ids=list(range(gpu_num)))
@@ -73,12 +69,11 @@ def test(opt):
         num_workers=0,
     )
 
-    
     lenNum = len(testloader)
     decision_net.eval()
     segment_net.eval()
+
     # test *****************************************************************
-    
     testiter = testloader.__iter__()
     prob_socre=[]
     label_score = []
