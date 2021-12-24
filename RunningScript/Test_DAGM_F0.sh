@@ -1,0 +1,1 @@
+python main.py --Mode 'Test' --Dataset 'DAGM' --Fold 0 --Lambda 0.7 --img_height 512 --img_width 512  --Need_load_segment_model True --Load_segment_model_dir 'Pretrain_Model/DAGM/F0/Segment_Net.pth' --Need_load_decision_model True --Load_decision_model_dir 'Pretrain_Model/DAGM/F0/Decision_Net.pth' --Remark 'Test'

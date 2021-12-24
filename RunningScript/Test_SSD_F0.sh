@@ -1,0 +1,1 @@
+python main.py --Mode 'Test' --Dataset 'SSD' --Fold 0 --Lambda 0.9 --img_height 256 --img_width 1600  --Need_load_segment_model True --Load_segment_model_dir 'Pretrain_Model/SSD/F0/Segment_Net.pth' --Need_load_decision_model True --Load_decision_model_dir 'Pretrain_Model/SSD/F0/Decision_Net.pth' --Remark 'Test'
