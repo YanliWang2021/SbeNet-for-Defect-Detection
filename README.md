@@ -4,7 +4,7 @@
 This repository is the offical implementation of Two-stage Deep Neural Network with Joint Loss and Multi-level Representations for Defect Detection. Up to now, we have uploaded the code and the pre-trained model.
 
 ## 2. Note
-1. Due to the size of the dataset, we will provide the method of obtaining the dataset as soon as possible. If you need to run the code before we provide dataset obtaining way, please construct the Data folder as `DataStructure.txt`.
+1. Due to the size of the dataset, we will provide the method of obtaining the dataset as soon as possible. To reproduce the results in our paper, please construct the Data folder indicated in `DataStructure.txt`.
 2. For compatibility reasons, the code is recommended to be run under Linux environment.
 
 ## 3. Usage
